@@ -2,12 +2,12 @@
 
 @file:DependsOn("com.offbytwo:docopt:0.6.0.20150202")
 
-import org.docopt.Docopt
 import java.io.File
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.util.concurrent.TimeUnit
 import kotlin.system.exitProcess
+import org.docopt.Docopt
 
 typealias CommandLineArguments = Map<String, Any>
 
@@ -130,9 +130,9 @@ Runtime.getRuntime().apply {
     println()
 }
 
-////////////////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////////////////
+// //////////////////////////////////////////////////////////////////////////////////////////////
+// //////////////////////////////////////////////////////////////////////////////////////////////
+// //////////////////////////////////////////////////////////////////////////////////////////////
 
 fun locateGradleHome(): File? {
     val envGradleHome = System.getenv("GRADLE_HOME")
@@ -150,9 +150,8 @@ fun locateMavenLocalRepository(): File? {
     return File(userHome, ".m2").takeIf { it.exists() }
 }
 
-fun CommandLineArguments.isFlagSet(vararg flagAliases: String): Boolean =
-    flagAliases.map { this[it] as Boolean? }
-        .first { it != null }!!
+fun CommandLineArguments.isFlagSet(vararg flagAliases: String): Boolean = flagAliases.map { this[it] as Boolean? }
+    .first { it != null }!!
 
 fun Runtime.execOnWetRun(command: String) = if (wetRun) exec(command) else null
 
@@ -189,10 +188,9 @@ fun Runtime.killAdb() {
     execOnWetRun("killall adb")
 }
 
-fun Runtime.isExecutableOnPath(executableName: String) =
-    System.getenv("PATH").split(File.pathSeparator)
-        .map(Paths::get)
-        .any { pathEntry -> Files.exists(pathEntry.resolve(executableName)) }
+fun Runtime.isExecutableOnPath(executableName: String) = System.getenv("PATH").split(File.pathSeparator)
+    .map(Paths::get)
+    .any { pathEntry -> Files.exists(pathEntry.resolve(executableName)) }
 
 fun deleteIdeaProjectFiles() {
     printInBold("🔥 Removing IntelliJ IDEA/Android Studio '.iml' project files...")
@@ -248,38 +246,39 @@ fun clearIdePreferences(ide: Ide) {
     val preferencesDirectories = locatePreferencesFolderFor(ide)
 
     when {
-        backup -> preferencesDirectories
-            .onEach {
-                println("     ℹ️  Clearing preferences for $ide ${extractVersion(it, ide)}...")
-            }
-            .backupAndDeleteByRenaming()
-        else -> preferencesDirectories
-            .onEach {
-                println("     ℹ️  Clearing preferences for $ide ${extractVersion(it, ide)}...")
-            }
-            .deleteRecursively()
+        backup ->
+            preferencesDirectories
+                .onEach {
+                    println("     ℹ️  Clearing preferences for $ide ${extractVersion(it, ide)}...")
+                }
+                .backupAndDeleteByRenaming()
+        else ->
+            preferencesDirectories
+                .onEach {
+                    println("     ℹ️  Clearing preferences for $ide ${extractVersion(it, ide)}...")
+                }
+                .deleteRecursively()
     }
 }
 
-fun locatePreferencesFolderFor(ide: Ide): Sequence<File> =
-    when {
-        isOsWindows() || isOsLinux() -> {
-            userHome.listContents(recursively = false) {
-                it.isDirectory && it.name.startsWith(".${ide.folderPrefix}")
-            }
-        }
-        isOsMacOs() -> {
-            File(userHome, "Library/Preferences")
-                .listContents(recursively = false) {
-                    it.isDirectory && it.name.startsWith(ide.folderPrefix, ignoreCase = true)
-                }
-        }
-        else -> {
-            println("     ⚠️  Unsupported OS, skipping.")
-            emptySequence()
+fun locatePreferencesFolderFor(ide: Ide): Sequence<File> = when {
+    isOsWindows() || isOsLinux() -> {
+        userHome.listContents(recursively = false) {
+            it.isDirectory && it.name.startsWith(".${ide.folderPrefix}")
         }
     }
-        .filter { it.exists() }
+    isOsMacOs() -> {
+        File(userHome, "Library/Preferences")
+            .listContents(recursively = false) {
+                it.isDirectory && it.name.startsWith(ide.folderPrefix, ignoreCase = true)
+            }
+    }
+    else -> {
+        println("     ⚠️  Unsupported OS, skipping.")
+        emptySequence()
+    }
+}
+    .filter { it.exists() }
 
 fun nukeIdeaProjectSettingsFolder() {
     printInBold("🔥 Removing IntelliJ IDEA/Android Studio '.idea' folders...")
@@ -343,9 +342,9 @@ fun Runtime.nukeGlobalCaches() {
         if (verbose) println("     ℹ️  Gradle home found at: ${gradleHome.absolutePath}")
         gradleHome.removeSubfoldersMatching {
             it.name.toLowerCase() == "build-scan-data" ||
-                    it.name.toLowerCase() == "caches" ||
-                    it.name.toLowerCase() == "daemon" ||
-                    it.name.toLowerCase() == "wrapper"
+                it.name.toLowerCase() == "caches" ||
+                it.name.toLowerCase() == "daemon" ||
+                it.name.toLowerCase() == "wrapper"
         }
     } else {
         println("     ⚠️  Unable to locate Gradle home directory. Checked \$GRADLE_HOME and ~/.gradle")
@@ -364,38 +363,39 @@ fun clearIdeCache(ide: Ide) {
     val cacheDirectories = locateCacheFolderFor(ide)
 
     when {
-        backup -> cacheDirectories
-            .onEach {
-                println("     ℹ️  Clearing cache for $ide ${extractVersion(it, ide)}...")
-            }
-            .backupAndDeleteByRenaming()
-        else -> cacheDirectories
-            .onEach {
-                println("     ℹ️  Clearing cache for $ide ${extractVersion(it, ide)}...")
-            }
-            .deleteRecursively()
+        backup ->
+            cacheDirectories
+                .onEach {
+                    println("     ℹ️  Clearing cache for $ide ${extractVersion(it, ide)}...")
+                }
+                .backupAndDeleteByRenaming()
+        else ->
+            cacheDirectories
+                .onEach {
+                    println("     ℹ️  Clearing cache for $ide ${extractVersion(it, ide)}...")
+                }
+                .deleteRecursively()
     }
 }
 
-fun locateCacheFolderFor(ide: Ide): Sequence<File> =
-    when {
-        isOsWindows() || isOsLinux() -> {
-            userHome.listContents(recursively = false) {
-                it.isDirectory && it.name.startsWith(".${ide.folderPrefix}")
-            }
-        }
-        isOsMacOs() -> {
-            File(userHome, "Library/Caches")
-                .listContents(recursively = false) {
-                    it.isDirectory && it.name.startsWith(ide.folderPrefix, ignoreCase = true)
-                }
-        }
-        else -> {
-            println("     ⚠️  Unsupported OS, skipping.")
-            emptySequence()
+fun locateCacheFolderFor(ide: Ide): Sequence<File> = when {
+    isOsWindows() || isOsLinux() -> {
+        userHome.listContents(recursively = false) {
+            it.isDirectory && it.name.startsWith(".${ide.folderPrefix}")
         }
     }
-        .filter { it.exists() }
+    isOsMacOs() -> {
+        File(userHome, "Library/Caches")
+            .listContents(recursively = false) {
+                it.isDirectory && it.name.startsWith(ide.folderPrefix, ignoreCase = true)
+            }
+    }
+    else -> {
+        println("     ⚠️  Unsupported OS, skipping.")
+        emptySequence()
+    }
+}
+    .filter { it.exists() }
 
 fun isOsLinux() = System.getProperty("os.name").startsWith("Linux", ignoreCase = true)
 fun isOsMacOs() = System.getProperty("os.name").startsWith("Mac", ignoreCase = true)
@@ -421,24 +421,22 @@ fun File.removeSubfoldersMatching(matcher: (file: File) -> Boolean) {
     }
 }
 
-fun File.listContents(recursively: Boolean, matcher: (File) -> Boolean): Sequence<File> =
-    listFiles()!!
-        .asSequence()
-        .flatMap {
-            when {
-                matcher(it) -> sequenceOf(it)
-                recursively && it.isDirectory -> {
-                    it.listContents(recursively = true, matcher = matcher)
-                }
-                else -> sequenceOf()
+fun File.listContents(recursively: Boolean, matcher: (File) -> Boolean): Sequence<File> = listFiles()!!
+    .asSequence()
+    .flatMap {
+        when {
+            matcher(it) -> sequenceOf(it)
+            recursively && it.isDirectory -> {
+                it.listContents(recursively = true, matcher = matcher)
             }
+            else -> sequenceOf()
         }
+    }
 
-fun Sequence<File>.backupAndDeleteByRenaming() =
-    this.onEach { if (verbose) println("     Deleting: ${it.absolutePath}") }
-        .map { Pair(it, generateBackupNameFor(it)) }
-        .onEach { (_, backup) -> if (verbose) println("       ⤷ Backing up to: ${backup.name}") }
-        .forEach { (original, backup) -> if (wetRun) original.renameTo(backup) }
+fun Sequence<File>.backupAndDeleteByRenaming() = this.onEach { if (verbose) println("     Deleting: ${it.absolutePath}") }
+    .map { Pair(it, generateBackupNameFor(it)) }
+    .onEach { (_, backup) -> if (verbose) println("       ⤷ Backing up to: ${backup.name}") }
+    .forEach { (original, backup) -> if (wetRun) original.renameTo(backup) }
 
 fun generateBackupNameFor(file: File): File {
     var backupFile: File
@@ -450,9 +448,8 @@ fun generateBackupNameFor(file: File): File {
     return backupFile
 }
 
-fun Sequence<File>.deleteRecursively() =
-    this.onEach { if (verbose) println("     Deleting: ${it.absolutePath}") }
-        .forEach { if (wetRun) it.deleteRecursively() }
+fun Sequence<File>.deleteRecursively() = this.onEach { if (verbose) println("     Deleting: ${it.absolutePath}") }
+    .forEach { if (wetRun) it.deleteRecursively() }
 
 fun isOsWindows() = System.getProperty("os.name").startsWith("Windows", ignoreCase = true)
 
